@@ -1,6 +1,6 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { useEffect, useMemo } from "react";
+import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { Toaster } from "sonner";
-import { hasSupabaseConfig } from "./supabase/client";
 import { useAnonymousAuth } from "./hooks/useAnonymousAuth";
 import { CreateSession } from "./pages/CreateSession";
 import { Home } from "./pages/Home";
@@ -12,41 +12,34 @@ import { VotedWaiting } from "./pages/VotedWaiting";
 import { WaitingRoom } from "./pages/WaitingRoom";
 
 export default function App() {
-  if (!hasSupabaseConfig) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-background px-6 text-center">
-        <div className="max-w-md rounded-2xl border border-border bg-card p-6">
-          <h1 className="mb-2 text-2xl font-bold">Supabase config needed</h1>
-          <p className="text-muted-foreground">Create a `.env` from `.env.example` with your Supabase URL and publishable key, then restart Vite.</p>
-        </div>
-      </main>
-    );
-  }
-
   return <AuthenticatedApp />;
 }
 
 function AuthenticatedApp() {
   const { userId, loading, error } = useAnonymousAuth();
-  const shouldReturnHomeAfterRefresh = isBrowserRefresh() && window.location.pathname !== "/";
+  const location = useLocation();
+  const navigate = useNavigate();
+  const wasBrowserRefresh = useMemo(() => isBrowserRefresh(), []);
+
+  useEffect(() => {
+    if (!loading && userId && wasBrowserRefresh && location.pathname !== "/") {
+      navigate("/", { replace: true });
+    }
+  }, [loading, location.pathname, navigate, userId, wasBrowserRefresh]);
 
   if (loading) {
-    return <div className="flex min-h-screen items-center justify-center bg-background text-muted-foreground">Signing you in...</div>;
+    return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Signing you in...</div>;
   }
 
   if (!userId) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-background px-6 text-center">
+      <main className="flex min-h-screen items-center justify-center px-6 text-center">
         <div className="max-w-md rounded-2xl border border-border bg-card p-6">
           <h1 className="mb-2 text-2xl font-bold">Authentication failed</h1>
           <p className="text-muted-foreground">{error || "Unable to sign in anonymously. Please refresh the page."}</p>
         </div>
       </main>
     );
-  }
-
-  if (shouldReturnHomeAfterRefresh) {
-    return <Navigate to="/" replace />;
   }
 
   return (
@@ -69,6 +62,12 @@ function AuthenticatedApp() {
 }
 
 function isBrowserRefresh() {
-  const navigation = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
-  return navigation?.type === "reload";
+  if (typeof performance === "undefined") return false;
+
+  try {
+    const navigation = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
+    return navigation?.type === "reload";
+  } catch {
+    return false;
+  }
 }

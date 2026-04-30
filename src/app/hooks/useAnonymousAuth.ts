@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { User } from "@supabase/supabase-js";
-import { supabase } from "../supabase/client";
+import { hasSupabaseConfig, supabase } from "../supabase/client";
+import { getLocalUserId } from "../utils/localSessionStore";
 
 export function useAnonymousAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -11,6 +12,15 @@ export function useAnonymousAuth() {
     let mounted = true;
 
     async function signIn() {
+      if (!hasSupabaseConfig) {
+        const localUser = { id: getLocalUserId() } as User;
+        if (mounted) {
+          setUser(localUser);
+          setLoading(false);
+        }
+        return;
+      }
+
       try {
         const { data } = await supabase.auth.getSession();
         if (data.session?.user) {
@@ -37,6 +47,12 @@ export function useAnonymousAuth() {
     }
 
     void signIn();
+
+    if (!hasSupabaseConfig) {
+      return () => {
+        mounted = false;
+      };
+    }
 
     const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
       const nextUser = session?.user ?? null;

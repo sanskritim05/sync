@@ -25,7 +25,18 @@ Sync is a browser-based group decision tool built for speed and simplicity. Crea
 | **Vote** | Swipe or tap to cast your vote; see results update live as others vote |
 | **Reveal** | A 3-2-1 countdown reveals the winner with a full vote breakdown — ties are broken by a coin flip |
 
-> Sessions use anonymous auth via Supabase - no account is ever required.
+> Sessions use anonymous auth via Supabase when configured. Without Supabase env vars, the app runs in a local browser-only demo mode.
+
+## Running Locally
+
+The app can start without any environment setup. If `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are not present, Sync stores demo sessions in your browser's local storage.
+
+Use Supabase config when you want real shared sessions across devices:
+
+```env
+VITE_SUPABASE_URL=https://your-project-ref.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-or-publishable-key
+```
 
 ## Demo
 

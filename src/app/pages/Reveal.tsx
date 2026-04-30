@@ -47,15 +47,15 @@ export function Reveal({ userId }: { userId: string }) {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-2xl flex-col bg-background px-6 py-8">
-      <section className="flex flex-1 items-center justify-center" style={{ background: "radial-gradient(circle at center, rgba(92, 107, 255, 0.15) 0%, transparent 70%)" }}>
+    <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-5 py-8 sm:px-6 lg:py-12">
+      <section className="flex flex-1 items-center justify-center rounded-2xl border border-primary/20 bg-card/70 p-6 shadow-2xl shadow-primary/10 backdrop-blur md:p-8" style={{ backgroundImage: "radial-gradient(circle at center, rgba(92, 107, 255, 0.15) 0%, transparent 70%)" }}>
         {countdown > 0 ? (
           <motion.div key={countdown} initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-[120px] font-bold">
             {countdown}
           </motion.div>
         ) : (
           showWinner && (
-            <motion.div initial={{ y: 100, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: "spring", damping: 15, stiffness: 200 }} className="w-full">
+            <motion.div initial={{ y: 100, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: "spring", damping: 15, stiffness: 200 }} className="w-full max-w-4xl">
               <div className="mb-8">
                 <div className={isTie ? "grid gap-3 sm:grid-cols-2" : ""}>
                   {winners.map((winner, index) => (
@@ -98,7 +98,7 @@ export function Reveal({ userId }: { userId: string }) {
       </section>
 
       {showWinner && (
-        <motion.button onClick={isCreator ? playAgain : goHome} disabled={isCreator && playingAgain} initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 1.2 }} className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl border-2 border-primary font-bold text-primary transition hover:bg-primary/10 disabled:border-border disabled:text-muted-foreground">
+        <motion.button onClick={isCreator ? playAgain : goHome} disabled={isCreator && playingAgain} initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 1.2 }} className="mx-auto mt-6 flex h-14 w-full max-w-sm items-center justify-center gap-2 rounded-2xl border-2 border-primary bg-card/70 font-bold text-primary transition hover:bg-primary/10 disabled:border-border disabled:text-muted-foreground">
           {isCreator ? <RefreshCw className={`h-5 w-5 ${playingAgain ? "animate-spin" : ""}`} /> : <Home className="h-5 w-5" />}
           {isCreator ? (playingAgain ? "Starting..." : "Start New Decision") : "Back to Home"}
         </motion.button>

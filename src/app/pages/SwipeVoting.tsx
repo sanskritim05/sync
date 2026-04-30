@@ -3,7 +3,8 @@ import { motion, PanInfo, useMotionValue, useTransform } from "framer-motion";
 import { useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { supabase } from "../supabase/client";
+import { hasSupabaseConfig, supabase } from "../supabase/client";
+import { addLocalVote, markLocalParticipantVoted } from "../utils/localSessionStore";
 import { sessionOptions } from "../utils/session";
 import { useLiveSession } from "./SessionGate";
 
@@ -51,6 +52,50 @@ export function SwipeVoting({ userId }: { userId: string }) {
     console.log(`[${userId.slice(0, 8)}...] Recording vote:`, voteData);
 
     try {
+      if (!hasSupabaseConfig) {
+        const voteSaved = addLocalVote({
+          sessionId: session.id,
+          optionId,
+          userId,
+          vote: value,
+        });
+
+        if (!voteSaved) {
+          toast.error("Vote failed, retrying...");
+          setLocalVoted((prev) => {
+            const updated = new Set(prev);
+            updated.delete(optionId);
+            return updated;
+          });
+          setFinishingVoting(false);
+          votingRef.current = false;
+          setIsVoting(false);
+          return;
+        }
+
+        if (allVoted) {
+          const participantUpdated = markLocalParticipantVoted(session.id, userId);
+          if (!participantUpdated) {
+            toast.error("Failed to submit votes. Please try again.");
+            setLocalVoted((prev) => {
+              const updated = new Set(prev);
+              updated.delete(optionId);
+              return updated;
+            });
+            setFinishingVoting(false);
+            votingRef.current = false;
+            setIsVoting(false);
+            return;
+          }
+
+          navigate(`/session/${session.id}/voted`);
+        }
+
+        votingRef.current = false;
+        setIsVoting(false);
+        return;
+      }
+
       const { error: voteError } = await supabase.from("votes").insert([voteData]);
 
       console.log(`[${userId.slice(0, 8)}...] Vote recorded for ${optionId}`);
@@ -112,30 +157,38 @@ export function SwipeVoting({ userId }: { userId: string }) {
 
   if (finishingVoting || !currentOption) {
     return (
-      <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center bg-background px-6 text-center">
-        <LoaderCircle className="mb-4 h-10 w-10 animate-spin text-primary" />
-        <h1 className="mb-2 text-2xl font-bold">Submitting votes...</h1>
-        <p className="text-muted-foreground">Getting the decision ready.</p>
+      <main className="mx-auto flex min-h-screen w-full max-w-4xl items-center justify-center px-5 py-8 sm:px-6">
+        <div className="w-full rounded-2xl border border-primary/20 bg-card/70 p-8 text-center shadow-2xl shadow-primary/10 backdrop-blur">
+          <LoaderCircle className="mx-auto mb-4 h-10 w-10 animate-spin text-primary" />
+          <h1 className="mb-2 text-3xl font-bold">Submitting votes...</h1>
+          <p className="text-muted-foreground">Getting the decision ready.</p>
+        </div>
       </main>
     );
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-2xl flex-col bg-background">
-      <div className="px-6 pb-4 pt-6">
-        <div className="mb-2 flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">{Math.min(completedCount + 1, allOptions.length)} of {allOptions.length} options</span>
-          <span className="text-xs text-muted-foreground/60">{userId.slice(0, 8)}...</span>
-        </div>
-        <div className="grid h-1 grid-cols-[repeat(var(--segments),1fr)] gap-1" style={{ "--segments": allOptions.length } as React.CSSProperties}>
-          {allOptions.map((option, index) => (
-            <div key={option.id} className={`rounded-full ${index < completedCount ? "bg-primary" : "bg-[#2A2D3E]"}`} />
-          ))}
-        </div>
+    <main className="mx-auto min-h-screen w-full max-w-6xl px-5 py-8 sm:px-6 lg:py-12">
+      <div className="mb-8 text-center">
+        <p className="mb-2 text-sm text-muted-foreground">Voting session</p>
+        <h1 className="text-3xl font-bold md:text-5xl">{session.topic}</h1>
       </div>
 
-      <section className="relative flex flex-1 items-center justify-center px-6">
-        <div className="relative h-64 w-full max-w-md">
+      <div className="rounded-2xl border border-primary/20 bg-card/70 p-6 shadow-2xl shadow-primary/10 backdrop-blur md:p-8">
+        <div className="mb-8">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">{Math.min(completedCount + 1, allOptions.length)} of {allOptions.length} options</span>
+            <span className="text-xs text-muted-foreground/60">{userId.slice(0, 8)}...</span>
+          </div>
+          <div className="grid h-1 grid-cols-[repeat(var(--segments),1fr)] gap-1" style={{ "--segments": allOptions.length } as React.CSSProperties}>
+            {allOptions.map((option, index) => (
+              <div key={option.id} className={`rounded-full ${index < completedCount ? "bg-primary" : "bg-[#2A2D3E]"}`} />
+            ))}
+          </div>
+        </div>
+
+        <section className="relative flex items-center justify-center">
+          <div className="relative h-72 w-full max-w-xl">
           {remainingOptions.slice(0, 3).map((option, stackIndex) => (
             <motion.div key={option.id} className="absolute inset-0" style={{ zIndex: 3 - stackIndex, scale: 1 - stackIndex * 0.05, y: stackIndex * 8 }} initial={false}>
               {stackIndex === 0 ? (
@@ -162,26 +215,27 @@ export function SwipeVoting({ userId }: { userId: string }) {
               )}
             </motion.div>
           ))}
-        </div>
-      </section>
+          </div>
+        </section>
 
-      <div className="flex items-center justify-center gap-12 px-6 pb-8">
-        <button 
-          onClick={() => void vote(false)} 
-          disabled={isVoting} 
-          className="flex h-16 w-16 items-center justify-center rounded-full bg-destructive shadow-lg transition hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed" 
-          aria-label="No"
-        >
-          <X className="h-8 w-8 text-white" strokeWidth={3} />
-        </button>
-        <button 
-          onClick={() => void vote(true)} 
-          disabled={isVoting} 
-          className="flex h-16 w-16 items-center justify-center rounded-full bg-success shadow-lg transition hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed" 
-          aria-label="Yes"
-        >
-          <Check className="h-8 w-8 text-white" strokeWidth={3} />
-        </button>
+        <div className="mt-8 flex items-center justify-center gap-6">
+          <button 
+            onClick={() => void vote(false)} 
+            disabled={isVoting} 
+            className="flex h-14 min-w-36 items-center justify-center gap-2 rounded-2xl bg-destructive px-6 font-bold text-white shadow-lg transition hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50" 
+          >
+            <X className="h-6 w-6" strokeWidth={3} />
+            No
+          </button>
+          <button 
+            onClick={() => void vote(true)} 
+            disabled={isVoting} 
+            className="flex h-14 min-w-36 items-center justify-center gap-2 rounded-2xl bg-success px-6 font-bold text-white shadow-lg transition hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50" 
+          >
+            <Check className="h-6 w-6" strokeWidth={3} />
+            Yes
+          </button>
+        </div>
       </div>
     </main>
   );

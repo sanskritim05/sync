@@ -1,7 +1,8 @@
 import { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
 import { useCallback, useEffect, useState } from "react";
-import { supabase } from "../supabase/client";
+import { hasSupabaseConfig, supabase } from "../supabase/client";
 import { Option, Participant, Session, SessionStatus, Vote } from "../types";
+import { getLocalSession, onLocalSessionsChange, removeExpiredLocalSession } from "../utils/localSessionStore";
 
 type SessionRow = {
   id: string;
@@ -71,6 +72,27 @@ export function useSession(sessionId: string | undefined) {
       return;
     }
 
+    if (!hasSupabaseConfig) {
+      const localSession = getLocalSession(sessionId);
+      if (!localSession) {
+        setSession(null);
+        setLoading(false);
+        return;
+      }
+
+      if (localSession.expiresAt <= Date.now()) {
+        setExpired(true);
+        removeExpiredLocalSession(sessionId);
+        setSession(null);
+        setLoading(false);
+        return;
+      }
+
+      setSession(localSession);
+      setLoading(false);
+      return;
+    }
+
     const { data: sessionRow, error: sessionError } = await supabase
       .from("sessions")
       .select("id, topic, status, created_by, expires_at")
@@ -114,6 +136,12 @@ export function useSession(sessionId: string | undefined) {
 
   useEffect(() => {
     if (!sessionId) return;
+
+    if (!hasSupabaseConfig) {
+      return onLocalSessionsChange(() => {
+        void loadSession();
+      });
+    }
 
     const reload = (_payload: RealtimePostgresChangesPayload<Record<string, unknown>>) => {
       void loadSession();

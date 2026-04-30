@@ -14,15 +14,15 @@ export function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <main className="flex-1 mx-auto w-full max-w-6xl px-6 py-16 md:py-24">
-        <div className="mb-12">
+    <div className="h-dvh overflow-hidden">
+      <main className="mx-auto flex h-full w-full max-w-6xl flex-col px-5 py-6 sm:px-6 md:py-8">
+        <div className="mb-6 md:mb-10">
           <Logo size={40} />
         </div>
-        <div className="grid md:grid-cols-2 gap-12 items-center">
+
+        <div className="grid flex-1 items-center gap-6 md:grid-cols-2 md:gap-10">
           <div>
-            <h1 className="text-5xl md:text-6xl font-bold mb-6">Make decisions together in real-time</h1>
-            <p className="text-xl text-muted-foreground mb-8">Sync brings your group to consensus fast. Create a session, invite friends, vote by swiping, and see results instantly.</p>
+            <h1 className="mb-6 text-5xl font-bold leading-tight sm:text-6xl md:text-7xl">Make decisions together in real-time</h1>
             <div className="flex flex-col sm:flex-row gap-4">
               <button onClick={() => navigate("/create")} className="flex h-12 items-center justify-center gap-2 rounded-xl bg-primary font-bold text-primary-foreground shadow-lg transition hover:bg-primary/90 px-8">
                 <Plus className="h-5 w-5" />
@@ -31,35 +31,39 @@ export function Home() {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl p-8 border border-primary/20">
-            <div className="space-y-6">
-              <div className="flex gap-4">
-                <div className="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center text-primary font-bold">1</div>
-                <div>
-                  <h3 className="font-bold mb-1">Create a decision</h3>
-                  <p className="text-sm text-muted-foreground">Set the topic and options</p>
+          <div className="rounded-2xl border border-primary/20 bg-card/70 p-6 shadow-2xl shadow-primary/10 backdrop-blur md:p-8">
+            <div className="flex h-full flex-col justify-between gap-6">
+              {[
+                {
+                  number: 1,
+                  title: "Create a decision",
+                  description: "Start a session, name what you are deciding, and add 2 to 6 options.",
+                },
+                {
+                  number: 2,
+                  title: "Invite participants",
+                  description: "Share the session code or invite link so everyone can join.",
+                },
+                {
+                  number: 3,
+                  title: "Vote & reveal",
+                  description: "Everyone votes, then the winning decision is revealed when the group is done.",
+                },
+              ].map((step) => (
+                <div key={step.number} className="grid grid-cols-[48px_1fr] items-start gap-4 rounded-xl border border-primary/10 bg-background/35 p-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/20 text-lg font-bold text-primary">{step.number}</div>
+                  <div className="min-w-0 pt-0.5">
+                    <h3 className="mb-1 font-bold leading-6">{step.title}</h3>
+                    <p className="text-sm leading-5 text-muted-foreground">{step.description}</p>
+                  </div>
                 </div>
-              </div>
-              <div className="flex gap-4">
-                <div className="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center text-primary font-bold">2</div>
-                <div>
-                  <h3 className="font-bold mb-1">Invite participants</h3>
-                  <p className="text-sm text-muted-foreground">Share the invite code</p>
-                </div>
-              </div>
-              <div className="flex gap-4">
-                <div className="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center text-primary font-bold">3</div>
-                <div>
-                  <h3 className="font-bold mb-1">Vote & reveal</h3>
-                  <p className="text-sm text-muted-foreground">Swipe to vote, see results instantly</p>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
 
-        <div className="mt-20 bg-card border border-border rounded-2xl p-8 md:p-12">
-          <h2 className="text-3xl font-bold mb-8 text-center">Join an existing session</h2>
+        <div className="mt-6 rounded-2xl border border-primary/20 bg-card/70 p-5 shadow-2xl shadow-primary/10 backdrop-blur md:mt-8 md:p-7">
+          <h2 className="mb-5 text-center text-2xl font-bold md:text-3xl">Join an existing session</h2>
           <form onSubmit={submitJoin} className="max-w-md mx-auto flex gap-3">
             <div className="relative flex-1">
               <Hash className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
@@ -78,12 +82,6 @@ export function Home() {
           </form>
         </div>
       </main>
-
-      <footer className="border-t border-border/50 bg-card/30 mt-20">
-        <div className="mx-auto max-w-6xl px-6 py-8 text-center text-sm text-muted-foreground">
-          <p>Made for groups who decide together</p>
-        </div>
-      </footer>
     </div>
   );
 }

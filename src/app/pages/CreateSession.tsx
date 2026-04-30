@@ -2,7 +2,8 @@ import { ArrowLeft, GripVertical, Plus, X } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { supabase } from "../supabase/client";
+import { hasSupabaseConfig, supabase } from "../supabase/client";
+import { createLocalSession, makeLocalOptions } from "../utils/localSessionStore";
 import { makeOptionId, makeSessionId, SESSION_TTL_MS } from "../utils/session";
 
 export function CreateSession({ userId }: { userId: string }) {
@@ -21,6 +22,42 @@ export function CreateSession({ userId }: { userId: string }) {
     let sessionId = makeSessionId();
     const maxAttempts = 5;
     let created = false;
+
+    if (!hasSupabaseConfig) {
+      for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+        const options = makeLocalOptions(sessionId, filledOptions, makeOptionId);
+        created = createLocalSession({
+          id: sessionId,
+          topic: topic.trim(),
+          status: "waiting",
+          createdBy: userId,
+          expiresAt: Date.now() + SESSION_TTL_MS,
+          options,
+          participants: [
+            {
+              id: userId,
+              sessionId,
+              displayName: "Host",
+              hasVoted: false,
+              joinedAt: Date.now(),
+            },
+          ],
+          votes: [],
+        });
+
+        if (created) break;
+        sessionId = makeSessionId();
+      }
+
+      if (!created) {
+        toast.error("Unable to create a unique session. Please try again.");
+        setCreating(false);
+        return;
+      }
+
+      navigate(`/session/${sessionId}/waiting`);
+      return;
+    }
 
     for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
       const { error: sessionError } = await supabase.from("sessions").insert({
@@ -82,15 +119,18 @@ export function CreateSession({ userId }: { userId: string }) {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-2xl flex-col bg-background">
-      <div className="flex items-center gap-4 border-b border-border/50 px-6 py-4">
-        <button onClick={() => navigate("/")} className="flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-card" aria-label="Back">
+    <main className="mx-auto min-h-screen w-full max-w-6xl px-5 py-8 sm:px-6 lg:py-12">
+      <div className="mb-8 flex items-center gap-4">
+        <button onClick={() => navigate("/")} className="flex h-11 w-11 items-center justify-center rounded-xl border border-primary/20 bg-card/70 transition hover:bg-card" aria-label="Back">
           <ArrowLeft className="h-6 w-6" />
         </button>
-        <h1 className="text-xl font-bold">New Decision</h1>
+        <div>
+          <p className="text-sm text-muted-foreground">Create a session</p>
+          <h1 className="text-3xl font-bold md:text-4xl">New Decision</h1>
+        </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 py-6">
+      <div className="rounded-2xl border border-primary/20 bg-card/70 p-6 shadow-2xl shadow-primary/10 backdrop-blur md:p-8">
         <section className="mb-8">
           <label className="mb-2 block text-sm text-muted-foreground">What are we deciding?</label>
           <input
@@ -106,7 +146,7 @@ export function CreateSession({ userId }: { userId: string }) {
 
         <section>
           <label className="mb-3 block text-sm text-muted-foreground">Options</label>
-          <div className="space-y-2">
+          <div className="grid gap-3 md:grid-cols-2">
             {options.map((option, index) => (
               <div key={index} className="flex items-center gap-2">
                 <GripVertical className="h-5 w-5 flex-shrink-0 text-muted-foreground/50" />
@@ -137,10 +177,8 @@ export function CreateSession({ userId }: { userId: string }) {
           </button>
           <p className="mt-3 text-xs text-muted-foreground">Add 2 to 6 options.</p>
         </section>
-      </div>
 
-      <div className="px-6 pb-6">
-        <button onClick={createSession} disabled={!isValid || creating} className="h-14 w-full rounded-2xl bg-primary font-bold text-primary-foreground transition hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground">
+        <button onClick={createSession} disabled={!isValid || creating} className="mt-8 h-14 w-full rounded-2xl bg-primary font-bold text-primary-foreground transition hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground md:w-auto md:px-12">
           {creating ? "Creating..." : "Create & Invite"}
         </button>
       </div>
