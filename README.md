@@ -13,8 +13,6 @@ Sync is a browser-based group decision tool built for speed and simplicity. Crea
 * [![Vite][Vite-shield]][Vite-url]
 * [![Supabase][Supabase-shield]][Supabase-url]
 * [![TailwindCSS][Tailwind-shield]][Tailwind-url]
-* [Framer Motion](https://www.framer.com/motion)
-* [Canvas Confetti](https://www.npmjs.com/package/canvas-confetti)
 
 ## How It Works
 
@@ -24,9 +22,6 @@ Sync is a browser-based group decision tool built for speed and simplicity. Crea
 | **Invite** | Share a link — participants join instantly with just a display name, no login needed |
 | **Vote** | Swipe or tap to cast your vote; see results update live as others vote |
 | **Reveal** | A 3-2-1 countdown reveals the winner with a full vote breakdown — ties are broken by a coin flip |
-
-> Sessions use anonymous auth via Supabase when configured. Without Supabase env vars, the app runs in a local browser-only demo mode.
-
 
 ## Demo
 
