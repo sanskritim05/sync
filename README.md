@@ -27,20 +27,12 @@ Sync is a browser-based group decision tool built for speed and simplicity. Crea
 
 > Sessions use anonymous auth via Supabase when configured. Without Supabase env vars, the app runs in a local browser-only demo mode.
 
-## Running Locally
-
-The app can start without any environment setup. If `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are not present, Sync stores demo sessions in your browser's local storage.
-
-Use Supabase config when you want real shared sessions across devices:
-
-```env
-VITE_SUPABASE_URL=https://your-project-ref.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-or-publishable-key
-```
 
 ## Demo
 
 Try it out: create a session and share the link with a friend to see real-time voting in action.
+
+[project link](https://syncrealtime.netlify.app)
 
 <!-- MARKDOWN LINKS -->
 [React-shield]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
