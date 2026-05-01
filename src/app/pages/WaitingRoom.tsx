@@ -61,7 +61,7 @@ export function WaitingRoom({ userId }: { userId: string }) {
         <h1 className="text-3xl font-bold md:text-5xl">{session.topic}</h1>
       </div>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-[380px_1fr]">
+      <div className="mt-14 grid gap-6 lg:grid-cols-[380px_1fr]">
         <section className="rounded-2xl border border-primary/20 bg-card/70 p-6 shadow-2xl shadow-primary/10 backdrop-blur">
           <p className="mb-2 text-sm text-primary-foreground/80">Share Invite</p>
           <div className="mb-4 rounded-xl border border-primary/20 bg-background/35 p-4">

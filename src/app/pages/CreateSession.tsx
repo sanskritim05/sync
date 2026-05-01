@@ -1,4 +1,4 @@
-import { ArrowLeft, GripVertical, Plus, X } from "lucide-react";
+import { ArrowLeft, Plus, X } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -130,7 +130,7 @@ export function CreateSession({ userId }: { userId: string }) {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-primary/20 bg-card/70 p-6 shadow-2xl shadow-primary/10 backdrop-blur md:p-8">
+      <div className="mt-8 rounded-2xl border border-primary/20 bg-card/70 p-6 shadow-2xl shadow-primary/10 backdrop-blur md:p-8">
         <section className="mb-8">
           <label className="mb-2 block text-sm text-muted-foreground">What are we deciding?</label>
           <input
@@ -149,7 +149,6 @@ export function CreateSession({ userId }: { userId: string }) {
           <div className="grid gap-3 md:grid-cols-2">
             {options.map((option, index) => (
               <div key={index} className="flex items-center gap-2">
-                <GripVertical className="h-5 w-5 flex-shrink-0 text-muted-foreground/50" />
                 <input
                   type="text"
                   value={option}

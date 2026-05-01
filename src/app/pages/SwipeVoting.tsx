@@ -88,7 +88,9 @@ export function SwipeVoting({ userId }: { userId: string }) {
             return;
           }
 
+          sessionStorage.setItem(`sync:finishedVoting:${session.id}:${userId}`, "true");
           navigate(`/session/${session.id}/voted`);
+          return;
         }
 
         votingRef.current = false;
@@ -134,7 +136,9 @@ export function SwipeVoting({ userId }: { userId: string }) {
           return;
         }
 
+        sessionStorage.setItem(`sync:finishedVoting:${session.id}:${userId}`, "true");
         navigate(`/session/${session.id}/voted`);
+        return;
       }
     } catch (error) {
       console.error("Vote error:", error);
@@ -174,8 +178,8 @@ export function SwipeVoting({ userId }: { userId: string }) {
         <h1 className="text-3xl font-bold md:text-5xl">{session.topic}</h1>
       </div>
 
-      <div className="rounded-2xl border border-primary/20 bg-card/70 p-6 shadow-2xl shadow-primary/10 backdrop-blur md:p-8">
-        <div className="mb-8">
+      <div className="mx-auto w-full max-w-3xl">
+        <div className="mb-10">
           <div className="mb-2 flex items-center justify-between">
             <span className="text-sm text-muted-foreground">{Math.min(completedCount + 1, allOptions.length)} of {allOptions.length} options</span>
             <span className="text-xs text-muted-foreground/60">{userId.slice(0, 8)}...</span>
@@ -218,7 +222,7 @@ export function SwipeVoting({ userId }: { userId: string }) {
           </div>
         </section>
 
-        <div className="mt-8 flex items-center justify-center gap-6">
+        <div className="mt-10 flex items-center justify-center gap-6">
           <button 
             onClick={() => void vote(false)} 
             disabled={isVoting} 

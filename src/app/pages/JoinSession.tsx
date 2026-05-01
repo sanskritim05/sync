@@ -64,25 +64,30 @@ export function JoinSession({ userId }: { userId: string }) {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-3xl items-center px-5 py-8 sm:px-6">
-      <form onSubmit={join} className="w-full rounded-2xl border border-primary/20 bg-card/70 p-6 shadow-2xl shadow-primary/10 backdrop-blur md:p-8">
-        <button onClick={() => navigate("/")} type="button" className="mb-8 flex h-11 w-11 items-center justify-center rounded-xl border border-primary/20 bg-background/35 transition hover:bg-card" aria-label="Back">
+    <main className="mx-auto flex min-h-screen w-full max-w-5xl items-center px-5 py-8 sm:px-6">
+      <form onSubmit={join} className="grid w-full gap-10 rounded-2xl border border-primary/20 bg-card/70 p-6 shadow-2xl shadow-primary/10 backdrop-blur md:grid-cols-[120px_1fr] md:p-10">
+        <button onClick={() => navigate("/")} type="button" className="flex h-14 w-14 items-center justify-center rounded-xl border border-primary/20 bg-background/35 transition hover:bg-card" aria-label="Back">
           <ArrowLeft className="h-6 w-6" />
         </button>
-        <div>
-          <p className="mb-2 text-sm text-muted-foreground">Joining</p>
-          <h1 className="text-4xl font-bold tracking-normal md:text-5xl">{sessionId || "Session"}</h1>
+
+        <div className="max-w-3xl">
+          <div className="mb-10">
+            <p className="mb-3 text-sm text-muted-foreground">Joining</p>
+            <h1 className="text-5xl font-bold tracking-normal md:text-6xl">{sessionId || "Session"}</h1>
+          </div>
+          <div className="space-y-5">
+            <input
+              value={displayName}
+              onChange={(event) => setDisplayName(event.target.value.slice(0, 24))}
+              placeholder="Your display name"
+              className="h-16 w-full rounded-2xl border border-border bg-card px-5 text-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              autoFocus
+            />
+            <button disabled={!sessionId || !displayName.trim() || joining} className="h-14 w-full rounded-2xl bg-primary font-bold text-primary-foreground transition hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground md:w-auto md:px-12">
+              {joining ? "Joining..." : "Join Decision"}
+            </button>
+          </div>
         </div>
-        <input
-          value={displayName}
-          onChange={(event) => setDisplayName(event.target.value.slice(0, 24))}
-          placeholder="Your display name"
-          className="h-14 w-full rounded-2xl border border-border bg-card px-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          autoFocus
-        />
-        <button disabled={!sessionId || !displayName.trim() || joining} className="h-14 w-full rounded-2xl bg-primary font-bold text-primary-foreground transition hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground md:w-auto md:px-12">
-          {joining ? "Joining..." : "Join Decision"}
-        </button>
       </form>
     </main>
   );

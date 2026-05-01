@@ -20,7 +20,11 @@ export function SessionGate({ userId }: { userId: string }) {
   useEffect(() => {
     if (!session || !sessionId) return;
     const participant = session.participants.find((item) => item.id === userId);
-    const statusPath = session.status === "voting" && participant?.hasVoted ? "voted" : session.status === "voting" ? "vote" : session.status;
+    const votedOptionIds = new Set(session.votes.filter((vote) => vote.userId === userId).map((vote) => vote.optionId));
+    const hasVotedOnEveryOption = session.options.length > 0 && session.options.every((option) => votedOptionIds.has(option.id));
+    const hasFinishedVotingLocally = sessionStorage.getItem(`sync:finishedVoting:${session.id}:${userId}`) === "true";
+    const hasFinishedVoting = Boolean(participant?.hasVoted || hasVotedOnEveryOption || hasFinishedVotingLocally);
+    const statusPath = session.status === "voting" && hasFinishedVoting ? "voted" : session.status === "voting" ? "vote" : session.status;
     const desiredPath = `/session/${sessionId}/${statusPath}`;
     if (location.pathname !== desiredPath) navigate(desiredPath, { replace: true });
   }, [location.pathname, navigate, session, sessionId, userId]);

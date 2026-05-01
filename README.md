@@ -1,4 +1,4 @@
-# Sync — Real-Time Group Decision Making
+# Sync: Real-Time Group Decision Making
 
 Sync makes group decisions fast and fun. Create a voting session with a topic and up to six options, invite your friends via a shareable link, and let everyone vote in real time — no account required.
 
