@@ -4,7 +4,7 @@ Sync makes group decisions fast and fun. Create a voting session with a topic an
 
 ## About The Project
 
-Sync is a browser-based group decision tool built for speed and simplicity. Create a session, share the link, and watch votes roll in live! No accounts, no friction. A 3-2-1 countdown reveals the winner with a full vote breakdown, and if it's a tie, a coin flip settles it. Sessions expire automatically after 24 hours.
+Sync is a browser-based group decision tool built for speed and simplicity. Create a session, share the link, and watch votes roll in live! A 3-2-1 countdown reveals the winner with a full vote breakdown. If it's a tie, a coin flip settles it.
 
 ### Built With
 
