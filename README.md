@@ -21,10 +21,10 @@ Sync is a browser-based group decision tool built for speed and simplicity. Crea
 
 | Step | Description |
 |------|-------------|
-| **Create** | Set a topic and 2–6 options to vote on |
-| **Invite** | Share a link — participants join instantly with just a display name, no login needed |
+| **Create** | Set a topic and 2 to 6 options to vote on |
+| **Invite** | Share a link, participants join instantly with just a display name, no login needed |
 | **Vote** | Swipe or tap to cast your vote; see results update live as others vote |
-| **Reveal** | A 3-2-1 countdown reveals the winner with a full vote breakdown — ties are broken by a coin flip |
+| **Reveal** | A 3-2-1 countdown reveals the winner with a full vote breakdown. Ties are broken by a coin flip |
 
 <!-- MARKDOWN LINKS -->
 [React-shield]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
