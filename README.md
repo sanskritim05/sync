@@ -1,6 +1,9 @@
 # Sync: Real-Time Group Decision Making
 
-Sync makes group decisions fast and fun. Create a voting session with a topic and up to six options, invite your friends via a shareable link, and let everyone vote in real time — no account required.
+Sync makes group decisions fast and fun. Create a voting session with a topic and up to six options, invite your friends via a shareable link, and let everyone vote in real time. No account required.
+
+[Try it out!](https://syncrealtime.netlify.app)
+
 
 ## About The Project
 
@@ -22,12 +25,6 @@ Sync is a browser-based group decision tool built for speed and simplicity. Crea
 | **Invite** | Share a link — participants join instantly with just a display name, no login needed |
 | **Vote** | Swipe or tap to cast your vote; see results update live as others vote |
 | **Reveal** | A 3-2-1 countdown reveals the winner with a full vote breakdown — ties are broken by a coin flip |
-
-## Demo
-
-Try it out: create a session and share the link with a friend to see real-time voting in action.
-
-[project link](https://syncrealtime.netlify.app)
 
 <!-- MARKDOWN LINKS -->
 [React-shield]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
