@@ -29,7 +29,7 @@ export function SessionGate({ userId }: { userId: string }) {
     if (location.pathname !== desiredPath) navigate(desiredPath, { replace: true });
   }, [location.pathname, navigate, session, sessionId, userId]);
 
-  if (loading) return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Loading session...</div>;
+  if (loading) return <div className="flex min-h-dvh items-center justify-center px-4 text-center text-muted-foreground">Loading session...</div>;
   if (expired) return <MissingSession message="This session expired after 24 hours." />;
   if (!session) return <MissingSession message="Session not found." />;
 
@@ -42,7 +42,7 @@ export function SessionGate({ userId }: { userId: string }) {
 
 function MissingSession({ message }: { message: string }) {
   return (
-    <main className="flex min-h-screen items-center justify-center px-6 text-center">
+    <main className="flex min-h-dvh items-center justify-center px-4 text-center sm:px-6">
       <div className="max-w-md rounded-2xl border border-border bg-card p-6">
         <h1 className="mb-2 text-2xl font-bold">Decision unavailable</h1>
         <p className="text-muted-foreground">{message}</p>

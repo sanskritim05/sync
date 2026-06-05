@@ -1,4 +1,4 @@
-import { Copy, Play, Share2, X } from "lucide-react";
+import { Copy, Link, Play, Share2, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -17,21 +17,48 @@ export function WaitingRoom({ userId }: { userId: string }) {
   const inviteUrl = `${window.location.origin}/join?sessionId=${session.id}`;
   const [startingVoting, setStartingVoting] = useState(false);
 
-  async function copyInvite() {
-    await navigator.clipboard.writeText(inviteUrl);
-    toast.success("Invite link copied.");
+  async function copyText(text: string, successMessage: string) {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        copyTextFallback(text);
+      }
+      toast.success(successMessage);
+    } catch {
+      try {
+        copyTextFallback(text);
+        toast.success(successMessage);
+      } catch {
+        toast.error("Copy failed. Please copy it manually.");
+      }
+    }
+  }
+
+  function copyCode() {
+    void copyText(session.id, "Session code copied.");
+  }
+
+  function copyInvite() {
+    void copyText(inviteUrl, "Invite link copied.");
   }
 
   async function shareInvite() {
-    if (navigator.share) {
-      await navigator.share({
-        title: "Join my Sync decision",
-        text: `Help decide: "${session.topic}"`,
-        url: inviteUrl,
-      });
-      return;
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: "Join my Sync decision",
+          text: `Help decide: "${session.topic}"`,
+          url: inviteUrl,
+        });
+        return;
+      }
+      copyInvite();
+    } catch (error) {
+      if ((error as Error).name !== "AbortError") {
+        toast.error("Sharing failed. Try copying the invite link instead.");
+      }
     }
-    await copyInvite();
   }
 
   async function startVoting() {
@@ -55,31 +82,35 @@ export function WaitingRoom({ userId }: { userId: string }) {
   }
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-6xl px-5 py-8 sm:px-6 lg:py-12">
+    <main className="mx-auto min-h-dvh w-full max-w-6xl px-4 py-6 sm:px-6 lg:py-12">
       <div className="mb-8 text-center">
         <p className="mb-2 text-sm text-muted-foreground">Waiting room</p>
-        <h1 className="text-3xl font-bold md:text-5xl">{session.topic}</h1>
+        <h1 className="break-words text-3xl font-bold md:text-5xl">{session.topic}</h1>
       </div>
 
-      <div className="mt-14 grid gap-6 lg:grid-cols-[380px_1fr]">
-        <section className="rounded-2xl border border-primary/20 bg-card/70 p-6 shadow-2xl shadow-primary/10 backdrop-blur">
+      <div className="mt-8 grid gap-5 lg:mt-14 lg:grid-cols-[380px_1fr]">
+        <section className="rounded-2xl border border-primary/20 bg-card/70 p-4 shadow-2xl shadow-primary/10 backdrop-blur sm:p-6">
           <p className="mb-2 text-sm text-primary-foreground/80">Share Invite</p>
           <div className="mb-4 rounded-xl border border-primary/20 bg-background/35 p-4">
             <p className="break-all text-center text-xl font-bold text-primary-foreground sm:text-2xl">{session.id}</p>
           </div>
-          <div className="flex gap-2">
-            <button onClick={copyInvite} className="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-primary font-medium text-primary-foreground transition hover:bg-primary/90">
+          <div className="grid gap-2 min-[420px]:grid-cols-3">
+            <button onClick={copyCode} className="flex h-12 items-center justify-center gap-2 rounded-xl bg-primary font-medium text-primary-foreground transition hover:bg-primary/90">
               <Copy className="h-5 w-5" />
-              Copy
+              Copy Code
             </button>
-            <button onClick={shareInvite} className="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-primary/30 bg-background/35 font-medium text-primary-foreground transition hover:bg-primary/10">
+            <button onClick={copyInvite} className="flex h-12 items-center justify-center gap-2 rounded-xl border border-primary/30 bg-background/35 font-medium text-primary-foreground transition hover:bg-primary/10">
+              <Link className="h-5 w-5" />
+              Copy Link
+            </button>
+            <button onClick={shareInvite} className="flex h-12 items-center justify-center gap-2 rounded-xl border border-primary/30 bg-background/35 font-medium text-primary-foreground transition hover:bg-primary/10">
               <Share2 className="h-5 w-5" />
               Share
             </button>
           </div>
           {isCreator && (
             <div className="mt-6 space-y-3">
-              <button onClick={startVoting} disabled={participants.length < 2 || startingVoting} className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary font-bold text-primary-foreground transition hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground">
+              <button onClick={startVoting} disabled={participants.length < 2 || startingVoting} className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 font-bold text-primary-foreground transition hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground">
                 <Play className="h-5 w-5" />
                 {startingVoting ? "Starting..." : "Start Voting"}
               </button>
@@ -91,9 +122,9 @@ export function WaitingRoom({ userId }: { userId: string }) {
           )}
         </section>
 
-        <section className="rounded-2xl border border-primary/20 bg-card/70 p-6 shadow-2xl shadow-primary/10 backdrop-blur">
+        <section className="rounded-2xl border border-primary/20 bg-card/70 p-4 shadow-2xl shadow-primary/10 backdrop-blur sm:p-6">
           <p className="mb-4 text-sm text-muted-foreground">Participants</p>
-          <div className="grid grid-cols-3 gap-5 sm:grid-cols-4 md:grid-cols-6">
+          <div className="grid grid-cols-3 gap-4 sm:grid-cols-4 sm:gap-5 md:grid-cols-6">
             {participants.map((participant, index) => (
               <motion.div key={participant.id} initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: index * 0.05 }}>
                 <Avatar participant={participant} />
@@ -117,4 +148,19 @@ export function WaitingRoom({ userId }: { userId: string }) {
       </div>
     </main>
   );
+}
+
+function copyTextFallback(text: string) {
+  const textArea = document.createElement("textarea");
+  textArea.value = text;
+  textArea.setAttribute("readonly", "");
+  textArea.style.position = "fixed";
+  textArea.style.opacity = "0";
+  document.body.appendChild(textArea);
+  textArea.select();
+
+  const copied = document.execCommand("copy");
+  document.body.removeChild(textArea);
+
+  if (!copied) throw new Error("Copy command failed");
 }

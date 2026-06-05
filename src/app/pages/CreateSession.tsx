@@ -119,7 +119,7 @@ export function CreateSession({ userId }: { userId: string }) {
   }
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-6xl px-5 py-8 sm:px-6 lg:py-12">
+    <main className="mx-auto min-h-dvh w-full max-w-6xl px-4 py-6 sm:px-6 lg:py-12">
       <div className="mb-8 flex items-center gap-4">
         <button onClick={() => navigate("/")} className="flex h-11 w-11 items-center justify-center rounded-xl border border-primary/20 bg-card/70 transition hover:bg-card" aria-label="Back">
           <ArrowLeft className="h-6 w-6" />
@@ -130,7 +130,7 @@ export function CreateSession({ userId }: { userId: string }) {
         </div>
       </div>
 
-      <div className="mt-8 rounded-2xl border border-primary/20 bg-card/70 p-6 shadow-2xl shadow-primary/10 backdrop-blur md:p-8">
+      <div className="mt-6 rounded-2xl border border-primary/20 bg-card/70 p-4 shadow-2xl shadow-primary/10 backdrop-blur sm:p-6 md:mt-8 md:p-8">
         <section className="mb-8">
           <label className="mb-2 block text-sm text-muted-foreground">What are we deciding?</label>
           <input
@@ -138,7 +138,7 @@ export function CreateSession({ userId }: { userId: string }) {
             value={topic}
             onChange={(event) => setTopic(event.target.value.slice(0, charLimit))}
             placeholder="e.g., Where should we eat?"
-            className="h-14 w-full rounded-2xl border border-border bg-card px-4 text-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            className="h-14 w-full rounded-2xl border border-border bg-card px-4 text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary sm:text-lg"
             maxLength={charLimit}
           />
           <p className="mt-1 text-right text-xs text-muted-foreground">{topic.length}/{charLimit}</p>
@@ -158,7 +158,7 @@ export function CreateSession({ userId }: { userId: string }) {
                     setOptions(next);
                   }}
                   placeholder={`Option ${index + 1}`}
-                  className="h-12 flex-1 rounded-xl border border-primary/40 bg-card px-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="h-12 min-w-0 flex-1 rounded-xl border border-primary/40 bg-card px-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   maxLength={40}
                 />
                 {options.length > 2 && (

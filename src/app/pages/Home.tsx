@@ -14,15 +14,15 @@ export function Home() {
   }
 
   return (
-    <div className="h-dvh overflow-hidden">
-      <main className="mx-auto flex h-full w-full max-w-6xl flex-col px-5 py-6 sm:px-6 md:py-8">
-        <div className="mb-6 md:mb-10">
+    <div className="min-h-dvh overflow-x-hidden">
+      <main className="mx-auto flex min-h-dvh w-full max-w-6xl flex-col px-4 py-5 sm:px-6 md:py-8">
+        <div className="mb-5 md:mb-10">
           <Logo size={40} />
         </div>
 
         <div className="grid flex-1 items-center gap-6 md:grid-cols-2 md:gap-10">
           <div>
-            <h1 className="mb-6 text-5xl font-bold leading-tight sm:text-6xl md:text-7xl">Make decisions together in real-time</h1>
+            <h1 className="mb-6 text-4xl font-bold leading-tight sm:text-6xl md:text-7xl">Make decisions together in real-time</h1>
             <div className="flex flex-col sm:flex-row gap-4">
               <button onClick={() => navigate("/create")} className="flex h-12 items-center justify-center gap-2 rounded-xl bg-primary font-bold text-primary-foreground shadow-lg transition hover:bg-primary/90 px-8">
                 <Plus className="h-5 w-5" />
@@ -31,7 +31,7 @@ export function Home() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-primary/20 bg-card/70 p-6 shadow-2xl shadow-primary/10 backdrop-blur md:p-8">
+          <div className="rounded-2xl border border-primary/20 bg-card/70 p-4 shadow-2xl shadow-primary/10 backdrop-blur sm:p-6 md:p-8">
             <div className="flex h-full flex-col justify-between gap-6">
               {[
                 {
@@ -62,9 +62,9 @@ export function Home() {
           </div>
         </div>
 
-        <div className="mt-6 rounded-2xl border border-primary/20 bg-card/70 p-5 shadow-2xl shadow-primary/10 backdrop-blur md:mt-8 md:p-7">
+        <div className="mt-6 rounded-2xl border border-primary/20 bg-card/70 p-4 shadow-2xl shadow-primary/10 backdrop-blur sm:p-5 md:mt-8 md:p-7">
           <h2 className="mb-5 text-center text-2xl font-bold md:text-3xl">Join an existing session</h2>
-          <form onSubmit={submitJoin} className="max-w-md mx-auto flex gap-3">
+          <form onSubmit={submitJoin} className="mx-auto grid max-w-md gap-3 sm:flex">
             <div className="relative flex-1">
               <Hash className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
               <input

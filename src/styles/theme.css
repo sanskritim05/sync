@@ -34,12 +34,15 @@
 
 html {
   background: var(--background);
+  overflow-x: hidden;
 }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  overflow-x: hidden;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   background:
     radial-gradient(circle at 18% 18%, rgba(92, 107, 255, 0.35), transparent 34%),
     radial-gradient(circle at 82% 24%, rgba(139, 92, 246, 0.28), transparent 30%),
@@ -51,6 +54,12 @@ body {
 button,
 input {
   font: inherit;
+}
+
+input,
+textarea,
+select {
+  font-size: 16px;
 }
 
 button:focus-visible,

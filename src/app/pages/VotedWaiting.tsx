@@ -1,6 +1,6 @@
 import { Check } from "lucide-react";
 import { motion } from "framer-motion";
-import { useEffect } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { Avatar } from "../components/Avatar";
 import { hasSupabaseConfig, supabase } from "../supabase/client";
 import { updateLocalSessionStatus } from "../utils/localSessionStore";
@@ -9,28 +9,51 @@ import { useLiveSession } from "./SessionGate";
 
 export function VotedWaiting({ userId }: { userId: string }) {
   const session = useLiveSession();
-  const participants = sessionParticipants(session);
+  const revealStartedRef = useRef(false);
+  const optionIds = useMemo(() => new Set(session.options.map((option) => option.id)), [session.options]);
+  const participants = sessionParticipants(session).map((participant) => {
+    const votedOptionIds = new Set(session.votes.filter((vote) => vote.userId === participant.id).map((vote) => vote.optionId));
+    const hasVotedOnEveryOption = optionIds.size > 0 && [...optionIds].every((optionId) => votedOptionIds.has(optionId));
+    return {
+      ...participant,
+      hasVoted: participant.hasVoted || hasVotedOnEveryOption,
+    };
+  });
   const votedCount = participants.filter((participant) => participant.hasVoted).length;
   const totalCount = participants.length;
   const isCreator = session.createdBy === userId;
 
   useEffect(() => {
-    if (isCreator && totalCount > 0 && votedCount === totalCount && session.status === "voting") {
-      if (!hasSupabaseConfig) {
-        updateLocalSessionStatus(session.id, "reveal");
-        return;
-      }
+    if (revealStartedRef.current || totalCount === 0 || votedCount !== totalCount || session.status !== "voting") return;
+    if (hasSupabaseConfig && !isCreator) return;
 
+    revealStartedRef.current = true;
+
+    if (!hasSupabaseConfig) {
+      updateLocalSessionStatus(session.id, "reveal");
+      return;
+    }
+
+    if (isCreator) {
       void supabase.from("sessions").update({ status: "reveal" }).eq("id", session.id).then((r) => {
-        if (r.error) console.error("Failed to update session status", r.error);
+        if (r.error) {
+          revealStartedRef.current = false;
+          console.error("Failed to update session status", r.error);
+        }
       });
     }
   }, [isCreator, session.id, session.status, totalCount, votedCount]);
 
+  useEffect(() => {
+    if (session.status !== "voting") {
+      revealStartedRef.current = false;
+    }
+  }, [session.status]);
+
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-5xl items-center px-5 py-8 sm:px-6">
-      <div className="w-full rounded-2xl border border-primary/20 bg-card/70 p-8 text-center shadow-2xl shadow-primary/10 backdrop-blur">
-        <motion.div className="relative mb-8" animate={{ rotate: 360 }} transition={{ duration: 3, repeat: Infinity, ease: "linear" }}>
+    <main className="mx-auto flex min-h-dvh w-full max-w-5xl items-center px-4 py-6 sm:px-6">
+      <div className="w-full rounded-2xl border border-primary/20 bg-card/70 p-5 text-center shadow-2xl shadow-primary/10 backdrop-blur sm:p-8">
+        <motion.div className="relative mx-auto mb-8 h-[120px] w-[120px]" animate={{ rotate: 360 }} transition={{ duration: 3, repeat: Infinity, ease: "linear" }}>
           <svg width="120" height="120" viewBox="0 0 120 120" aria-hidden="true">
             <circle cx="60" cy="60" r="50" stroke="rgba(92, 107, 255, 0.2)" strokeWidth="8" fill="none" />
             <motion.circle cx="60" cy="60" r="50" stroke="#5C6BFF" strokeWidth="8" fill="none" strokeLinecap="round" strokeDasharray="314" strokeDashoffset="157" animate={{ strokeDashoffset: [157, 0, 157] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} />
@@ -49,7 +72,7 @@ export function VotedWaiting({ userId }: { userId: string }) {
           {votedCount} <span className="text-muted-foreground">of</span> {totalCount}
         </motion.div>
 
-        <div className="flex flex-wrap items-center justify-center gap-5">
+        <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-5">
           {participants.map((participant) => (
             <motion.div key={participant.id} className="relative" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 200 }}>
               <Avatar participant={participant} showVote />

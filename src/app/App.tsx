@@ -28,12 +28,12 @@ function AuthenticatedApp() {
   }, [loading, location.pathname, navigate, userId, wasBrowserRefresh]);
 
   if (loading) {
-    return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Signing you in...</div>;
+    return <div className="flex min-h-dvh items-center justify-center px-4 text-center text-muted-foreground">Signing you in...</div>;
   }
 
   if (!userId) {
     return (
-      <main className="flex min-h-screen items-center justify-center px-6 text-center">
+      <main className="flex min-h-dvh items-center justify-center px-4 text-center sm:px-6">
         <div className="max-w-md rounded-2xl border border-border bg-card p-6">
           <h1 className="mb-2 text-2xl font-bold">Authentication failed</h1>
           <p className="text-muted-foreground">{error || "Unable to sign in anonymously. Please refresh the page."}</p>
