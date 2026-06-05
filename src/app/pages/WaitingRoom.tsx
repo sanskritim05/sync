@@ -1,4 +1,4 @@
-import { Copy, Link, Play, Share2, X } from "lucide-react";
+import { Copy, Play, Share2, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -14,7 +14,7 @@ export function WaitingRoom({ userId }: { userId: string }) {
   const navigate = useNavigate();
   const participants = sessionParticipants(session);
   const isCreator = session.createdBy === userId;
-  const inviteUrl = `${window.location.origin}/join?sessionId=${session.id}`;
+  const inviteUrl = `${window.location.origin}/?sessionId=${encodeURIComponent(session.id)}`;
   const [startingVoting, setStartingVoting] = useState(false);
 
   async function copyText(text: string, successMessage: string) {
@@ -39,10 +39,6 @@ export function WaitingRoom({ userId }: { userId: string }) {
     void copyText(session.id, "Session code copied.");
   }
 
-  function copyInvite() {
-    void copyText(inviteUrl, "Invite link copied.");
-  }
-
   async function shareInvite() {
     try {
       if (navigator.share) {
@@ -53,10 +49,10 @@ export function WaitingRoom({ userId }: { userId: string }) {
         });
         return;
       }
-      copyInvite();
+      toast.error("Sharing is not available on this device.");
     } catch (error) {
       if ((error as Error).name !== "AbortError") {
-        toast.error("Sharing failed. Try copying the invite link instead.");
+        toast.error("Sharing failed. Please try again.");
       }
     }
   }
@@ -94,14 +90,10 @@ export function WaitingRoom({ userId }: { userId: string }) {
           <div className="mb-4 rounded-xl border border-primary/20 bg-background/35 p-4">
             <p className="break-all text-center text-xl font-bold text-primary-foreground sm:text-2xl">{session.id}</p>
           </div>
-          <div className="grid gap-2 min-[420px]:grid-cols-3">
+          <div className="grid gap-2 min-[420px]:grid-cols-2">
             <button onClick={copyCode} className="flex h-12 items-center justify-center gap-2 rounded-xl bg-primary font-medium text-primary-foreground transition hover:bg-primary/90">
               <Copy className="h-5 w-5" />
               Copy Code
-            </button>
-            <button onClick={copyInvite} className="flex h-12 items-center justify-center gap-2 rounded-xl border border-primary/30 bg-background/35 font-medium text-primary-foreground transition hover:bg-primary/10">
-              <Link className="h-5 w-5" />
-              Copy Link
             </button>
             <button onClick={shareInvite} className="flex h-12 items-center justify-center gap-2 rounded-xl border border-primary/30 bg-background/35 font-medium text-primary-foreground transition hover:bg-primary/10">
               <Share2 className="h-5 w-5" />

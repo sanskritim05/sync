@@ -1,11 +1,17 @@
 import { Hash, Plus } from "lucide-react";
-import { FormEvent, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { FormEvent, useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Logo } from "../components/Logo";
 
 export function Home() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [joinCode, setJoinCode] = useState("");
+
+  useEffect(() => {
+    const sessionId = searchParams.get("sessionId")?.trim().toUpperCase();
+    if (sessionId) navigate(`/join?sessionId=${encodeURIComponent(sessionId)}`, { replace: true });
+  }, [navigate, searchParams]);
 
   function submitJoin(event: FormEvent) {
     event.preventDefault();
