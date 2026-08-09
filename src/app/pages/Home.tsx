@@ -1,7 +1,30 @@
-import { Hash, Plus } from "lucide-react";
+import { Hash, Sparkles, Users, Vote } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { motion } from "framer-motion";
 import { Logo } from "../components/Logo";
+import { Button, Input, Panel, Screen } from "../components/kit";
+
+const steps = [
+  {
+    icon: Sparkles,
+    title: "Create a decision",
+    body: "Add a topic and up to 6 options.",
+    tint: "bg-sunny",
+  },
+  {
+    icon: Users,
+    title: "Invite participants",
+    body: "Share a 6-character code or link.",
+    tint: "bg-sky",
+  },
+  {
+    icon: Vote,
+    title: "Vote & reveal",
+    body: "Swipe yes or no, then a countdown reveals it.",
+    tint: "bg-mint",
+  },
+];
 
 export function Home() {
   const navigate = useNavigate();
@@ -16,78 +39,80 @@ export function Home() {
   function submitJoin(event: FormEvent) {
     event.preventDefault();
     const sessionId = joinCode.trim().toUpperCase();
-    if (sessionId.length >= 3) navigate(`/join?sessionId=${encodeURIComponent(sessionId)}`);
+    if (sessionId.length >= 4) navigate(`/join?sessionId=${encodeURIComponent(sessionId)}`);
   }
 
   return (
-    <div className="min-h-dvh overflow-x-hidden">
-      <main className="mx-auto flex min-h-dvh w-full max-w-6xl flex-col px-4 py-5 sm:px-6 md:py-8">
-        <div className="mb-5 md:mb-10">
-          <Logo size={40} />
-        </div>
+    <Screen className="flex flex-col gap-10 py-6">
+      <header className="flex items-center justify-between">
+        <Logo />
+        <span className="border-ink bg-bubble hidden rotate-2 rounded-full border-[2.5px] px-4 py-1.5 text-sm font-bold text-white sm:block">
+          Stop debating. Start deciding.
+        </span>
+      </header>
 
-        <div className="grid flex-1 items-center gap-6 md:grid-cols-2 md:gap-10">
-          <div>
-            <h1 className="mb-6 text-4xl font-bold leading-tight sm:text-6xl md:text-7xl">Make decisions together in real-time</h1>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button onClick={() => navigate("/create")} className="flex h-12 items-center justify-center gap-2 rounded-xl bg-primary font-bold text-primary-foreground shadow-lg transition hover:bg-primary/90 px-8">
-                <Plus className="h-5 w-5" />
-                Start Now
-              </button>
-            </div>
-          </div>
+      <motion.section
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="flex flex-col gap-6"
+      >
+        <p className="border-ink bg-bubble w-fit -rotate-2 rounded-full border-[2.5px] px-3 py-1 text-sm font-bold text-white sm:hidden">
+          Stop debating. Start deciding.
+        </p>
+        <h1 className="font-display text-5xl leading-[1.02] font-bold tracking-tight sm:text-7xl">
+          Make decisions
+          <br />
+          together in{" "}
+          <span className="border-ink bg-sunny inline-block -rotate-1 rounded-2xl border-[2.5px] px-3 shadow-pop">
+            real-time
+          </span>
+        </h1>
+        <Button className="h-14 w-full text-lg sm:w-60" onClick={() => navigate("/create")}>
+          Start Now
+        </Button>
+      </motion.section>
 
-          <div className="rounded-2xl border border-primary/20 bg-card/70 p-4 shadow-2xl shadow-primary/10 backdrop-blur sm:p-6 md:p-8">
-            <div className="flex h-full flex-col justify-between gap-6">
-              {[
-                {
-                  number: 1,
-                  title: "Create a decision",
-                  description: "Start a session, name what you are deciding, and add 2 to 6 options.",
-                },
-                {
-                  number: 2,
-                  title: "Invite participants",
-                  description: "Share the session code or invite link so everyone can join.",
-                },
-                {
-                  number: 3,
-                  title: "Vote & reveal",
-                  description: "Everyone votes, then the winning decision is revealed when the group is done.",
-                },
-              ].map((step) => (
-                <div key={step.number} className="grid grid-cols-[48px_1fr] items-start gap-4 rounded-xl border border-primary/10 bg-background/35 p-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/20 text-lg font-bold text-primary">{step.number}</div>
-                  <div className="min-w-0 pt-0.5">
-                    <h3 className="mb-1 font-bold leading-6">{step.title}</h3>
-                    <p className="text-sm leading-5 text-muted-foreground">{step.description}</p>
-                  </div>
+      <div className="grid gap-4 md:grid-cols-2">
+        <Panel className="tilt-left">
+          <h2 className="font-display text-xl font-bold">How it works</h2>
+          <ol className="mt-4 flex flex-col gap-4">
+            {steps.map((step, index) => (
+              <li key={step.title} className="flex items-start gap-3">
+                <span className={`border-ink text-ink mt-0.5 grid size-10 shrink-0 place-items-center rounded-xl border-[2.5px] ${step.tint}`}>
+                  <step.icon size={18} />
+                </span>
+                <div className="min-w-0">
+                  <p className="font-bold">
+                    {index + 1}. {step.title}
+                  </p>
+                  <p className="text-sm text-muted-foreground">{step.body}</p>
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
+              </li>
+            ))}
+          </ol>
+        </Panel>
 
-        <div className="mt-6 rounded-2xl border border-primary/20 bg-card/70 p-4 shadow-2xl shadow-primary/10 backdrop-blur sm:p-5 md:mt-8 md:p-7">
-          <h2 className="mb-5 text-center text-2xl font-bold md:text-3xl">Join an existing session</h2>
-          <form onSubmit={submitJoin} className="mx-auto grid max-w-md gap-3 sm:flex">
-            <div className="relative flex-1">
-              <Hash className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Enter session code"
+        <Panel className="tilt-right flex flex-col gap-4">
+          <h2 className="font-display text-xl font-bold">Join a decision</h2>
+          <form onSubmit={submitJoin} className="flex flex-col gap-4">
+            <div className="relative">
+              <Hash size={18} className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
                 value={joinCode}
-                onChange={(event) => setJoinCode(event.target.value.toUpperCase())}
-                className="h-12 w-full rounded-xl border border-border bg-background px-4 pl-12 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 maxLength={12}
+                placeholder="SESSION CODE"
+                autoCapitalize="characters"
+                className="pl-11 font-display tracking-[0.3em] uppercase"
+                onChange={(event) => setJoinCode(event.target.value.toUpperCase().slice(0, 12))}
               />
             </div>
-            <button className="h-12 rounded-xl bg-primary px-6 font-bold text-primary-foreground transition hover:bg-primary/90 disabled:bg-border disabled:text-muted-foreground" disabled={joinCode.trim().length < 3}>
+            <Button variant="outline" disabled={joinCode.trim().length < 4}>
               Join
-            </button>
+            </Button>
           </form>
-        </div>
-      </main>
-    </div>
+        </Panel>
+      </div>
+    </Screen>
   );
 }

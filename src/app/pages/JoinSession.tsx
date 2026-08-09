@@ -1,7 +1,9 @@
+import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import { FormEvent, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
+import { Button, Input, Panel, Screen } from "../components/kit";
 import { hasSupabaseConfig, supabase } from "../supabase/client";
 import { getLocalSession, joinLocalSession } from "../utils/localSessionStore";
 
@@ -36,7 +38,11 @@ export function JoinSession({ userId }: { userId: string }) {
       return;
     }
 
-    const { data: session, error } = await supabase.from("sessions").select("status, expires_at").eq("id", sessionId).maybeSingle<{ status: "waiting" | "voting" | "reveal"; expires_at: string }>();
+    const { data: session, error } = await supabase
+      .from("sessions")
+      .select("status, expires_at")
+      .eq("id", sessionId)
+      .maybeSingle<{ status: "waiting" | "voting" | "reveal"; expires_at: string }>();
     if (error || !session) {
       toast.error("That session does not exist.");
       setJoining(false);
@@ -48,47 +54,49 @@ export function JoinSession({ userId }: { userId: string }) {
       return;
     }
     localStorage.setItem("sync:displayName", displayName.trim());
-    await supabase
-      .from("participants")
-      .upsert(
-        {
-          session_id: sessionId,
-          user_id: userId,
-          display_name: displayName.trim(),
-          has_voted: false,
-          joined_at: new Date().toISOString(),
-        },
-        { onConflict: "session_id,user_id" },
-      );
+    await supabase.from("participants").upsert(
+      {
+        session_id: sessionId,
+        user_id: userId,
+        display_name: displayName.trim(),
+        has_voted: false,
+        joined_at: new Date().toISOString(),
+      },
+      { onConflict: "session_id,user_id" },
+    );
     navigate(`/session/${sessionId}/${session.status === "voting" ? "vote" : session.status}`);
   }
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-5xl items-center px-4 py-6 sm:px-6">
-      <form onSubmit={join} className="grid w-full gap-6 rounded-2xl border border-primary/20 bg-card/70 p-4 shadow-2xl shadow-primary/10 backdrop-blur sm:p-6 md:grid-cols-[120px_1fr] md:gap-10 md:p-10">
-        <button onClick={() => navigate("/")} type="button" className="flex h-14 w-14 items-center justify-center rounded-xl border border-primary/20 bg-background/35 transition hover:bg-card" aria-label="Back">
-          <ArrowLeft className="h-6 w-6" />
-        </button>
-
-        <div className="max-w-3xl">
-          <div className="mb-8 md:mb-10">
-            <p className="mb-3 text-sm text-muted-foreground">Joining</p>
-            <h1 className="break-all text-4xl font-bold tracking-normal sm:text-5xl md:text-6xl">{sessionId || "Session"}</h1>
+    <Screen className="flex max-w-lg flex-col gap-6 py-6">
+      <Button variant="ghost" className="w-12 px-0" onClick={() => navigate("/")} aria-label="Back">
+        <ArrowLeft size={20} />
+      </Button>
+      <motion.h1
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="font-display text-5xl font-bold tracking-[0.2em] break-all text-primary sm:text-6xl"
+      >
+        {sessionId || "Session"}
+      </motion.h1>
+      <form onSubmit={(event) => void join(event)}>
+        <Panel className="flex flex-col gap-4">
+          <div className="flex items-baseline justify-between">
+            <label className="text-sm font-medium">Your display name</label>
+            <span className="text-xs text-muted-foreground">{displayName.length}/24</span>
           </div>
-          <div className="space-y-5">
-            <input
-              value={displayName}
-              onChange={(event) => setDisplayName(event.target.value.slice(0, 24))}
-              placeholder="Your display name"
-              className="h-14 w-full rounded-2xl border border-border bg-card px-5 text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary sm:h-16 sm:text-lg"
-              autoFocus
-            />
-            <button disabled={!sessionId || !displayName.trim() || joining} className="h-14 w-full rounded-2xl bg-primary font-bold text-primary-foreground transition hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground md:w-auto md:px-12">
-              {joining ? "Joining..." : "Join Decision"}
-            </button>
-          </div>
-        </div>
+          <Input
+            value={displayName}
+            maxLength={24}
+            placeholder="e.g., Alex"
+            autoFocus
+            onChange={(event) => setDisplayName(event.target.value.slice(0, 24))}
+          />
+          <Button disabled={!sessionId || !displayName.trim() || joining}>
+            {joining ? "Joining..." : "Join Decision"}
+          </Button>
+        </Panel>
       </form>
-    </main>
+    </Screen>
   );
 }

@@ -1,6 +1,8 @@
 import { useEffect, useMemo } from "react";
 import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { Toaster } from "sonner";
+import { Logo } from "./components/Logo";
+import { Panel, Screen } from "./components/kit";
 import { useAnonymousAuth } from "./hooks/useAnonymousAuth";
 import { CreateSession } from "./pages/CreateSession";
 import { Home } from "./pages/Home";
@@ -28,17 +30,24 @@ function AuthenticatedApp() {
   }, [loading, location.pathname, navigate, userId, wasBrowserRefresh]);
 
   if (loading) {
-    return <div className="flex min-h-dvh items-center justify-center px-4 text-center text-muted-foreground">Signing you in...</div>;
+    return (
+      <div className="flex min-h-dvh flex-col items-center justify-center gap-6">
+        <div className="animate-pulse">
+          <Logo size={56} />
+        </div>
+        <p className="text-sm text-muted-foreground">Signing you in...</p>
+      </div>
+    );
   }
 
   if (!userId) {
     return (
-      <main className="flex min-h-dvh items-center justify-center px-4 text-center sm:px-6">
-        <div className="max-w-md rounded-2xl border border-border bg-card p-6">
-          <h1 className="mb-2 text-2xl font-bold">Authentication failed</h1>
+      <Screen className="grid min-h-dvh place-items-center">
+        <Panel className="max-w-md text-center">
+          <h1 className="font-display mb-2 text-2xl font-bold">Authentication failed</h1>
           <p className="text-muted-foreground">{error || "Unable to sign in anonymously. Please refresh the page."}</p>
-        </div>
-      </main>
+        </Panel>
+      </Screen>
     );
   }
 
@@ -56,7 +65,7 @@ function AuthenticatedApp() {
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-      <Toaster position="top-center" theme="dark" />
+      <Toaster position="top-center" richColors />
     </>
   );
 }

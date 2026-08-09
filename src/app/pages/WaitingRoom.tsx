@@ -1,12 +1,12 @@
-import { Copy, Play, Share2, X } from "lucide-react";
-import { motion } from "framer-motion";
-import { toast } from "sonner";
+import { AnimatePresence, motion } from "framer-motion";
+import { Copy, Share2 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Avatar } from "../components/Avatar";
+import { toast } from "sonner";
+import { Avatar, Button, Panel, Screen } from "../components/kit";
 import { hasSupabaseConfig, supabase } from "../supabase/client";
 import { updateLocalSessionStatus } from "../utils/localSessionStore";
-import { sessionParticipants } from "../utils/session";
+import { avatarColor, initials, sessionParticipants } from "../utils/session";
 import { useLiveSession } from "./SessionGate";
 
 export function WaitingRoom({ userId }: { userId: string }) {
@@ -16,6 +16,7 @@ export function WaitingRoom({ userId }: { userId: string }) {
   const isCreator = session.createdBy === userId;
   const inviteUrl = `${window.location.origin}/?sessionId=${encodeURIComponent(session.id)}`;
   const [startingVoting, setStartingVoting] = useState(false);
+  const emptySlots = Math.max(0, 3 - participants.length);
 
   async function copyText(text: string, successMessage: string) {
     try {
@@ -35,10 +36,6 @@ export function WaitingRoom({ userId }: { userId: string }) {
     }
   }
 
-  function copyCode() {
-    void copyText(session.id, "Session code copied.");
-  }
-
   async function shareInvite() {
     try {
       if (navigator.share) {
@@ -49,7 +46,7 @@ export function WaitingRoom({ userId }: { userId: string }) {
         });
         return;
       }
-      toast.error("Sharing is not available on this device.");
+      await copyText(inviteUrl, "Invite link copied");
     } catch (error) {
       if ((error as Error).name !== "AbortError") {
         toast.error("Sharing failed. Please try again.");
@@ -72,73 +69,71 @@ export function WaitingRoom({ userId }: { userId: string }) {
     }
   }
 
-  function cancelSession() {
-    if (startingVoting) return;
-    navigate("/", { replace: true });
-  }
-
   return (
-    <main className="mx-auto min-h-dvh w-full max-w-6xl px-4 py-6 sm:px-6 lg:py-12">
-      <div className="mb-8 text-center">
-        <p className="mb-2 text-sm text-muted-foreground">Waiting room</p>
-        <h1 className="break-words text-3xl font-bold md:text-5xl">{session.topic}</h1>
-      </div>
+    <Screen className="flex flex-col gap-6 py-6">
+      <h1 className="font-display text-3xl font-bold">{session.topic}</h1>
 
-      <div className="mt-8 grid gap-5 lg:mt-14 lg:grid-cols-[380px_1fr]">
-        <section className="rounded-2xl border border-primary/20 bg-card/70 p-4 shadow-2xl shadow-primary/10 backdrop-blur sm:p-6">
-          <p className="mb-2 text-sm text-primary-foreground/80">Share Invite</p>
-          <div className="mb-4 rounded-xl border border-primary/20 bg-background/35 p-4">
-            <p className="break-all text-center text-xl font-bold text-primary-foreground sm:text-2xl">{session.id}</p>
+      <div className="grid gap-4 md:grid-cols-2">
+        <Panel className="flex flex-col gap-4">
+          <p className="text-sm text-muted-foreground">Session code</p>
+          <p className="font-display text-5xl font-bold tracking-[0.15em] text-primary">{session.id}</p>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Button variant="outline" className="flex-1" onClick={() => void copyText(session.id, "Code copied")}>
+              <Copy size={18} /> Copy Code
+            </Button>
+            <Button className="flex-1" onClick={() => void shareInvite()}>
+              <Share2 size={18} /> Share
+            </Button>
           </div>
-          <div className="grid gap-2 min-[420px]:grid-cols-2">
-            <button onClick={copyCode} className="flex h-12 items-center justify-center gap-2 rounded-xl bg-primary font-medium text-primary-foreground transition hover:bg-primary/90">
-              <Copy className="h-5 w-5" />
-              Copy Code
-            </button>
-            <button onClick={shareInvite} className="flex h-12 items-center justify-center gap-2 rounded-xl border border-primary/30 bg-background/35 font-medium text-primary-foreground transition hover:bg-primary/10">
-              <Share2 className="h-5 w-5" />
-              Share
-            </button>
-          </div>
-          {isCreator && (
-            <div className="mt-6 space-y-3">
-              <button onClick={startVoting} disabled={participants.length < 2 || startingVoting} className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 font-bold text-primary-foreground transition hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground">
-                <Play className="h-5 w-5" />
+          {isCreator ? (
+            <div className="flex flex-col gap-2">
+              <Button disabled={participants.length < 2 || startingVoting} onClick={() => void startVoting()}>
                 {startingVoting ? "Starting..." : "Start Voting"}
-              </button>
-              <button onClick={cancelSession} disabled={startingVoting} className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border-2 border-border font-bold text-muted-foreground transition hover:border-destructive/60 hover:bg-destructive/10 hover:text-destructive disabled:opacity-50">
-                <X className="h-5 w-5" />
+              </Button>
+              {participants.length < 2 && (
+                <p className="text-center text-xs text-muted-foreground">Need at least 2 participants</p>
+              )}
+              <Button variant="destructive" disabled={startingVoting} onClick={() => navigate("/", { replace: true })}>
                 Cancel
-              </button>
+              </Button>
             </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">Waiting for the host to start...</p>
           )}
-        </section>
+        </Panel>
 
-        <section className="rounded-2xl border border-primary/20 bg-card/70 p-4 shadow-2xl shadow-primary/10 backdrop-blur sm:p-6">
-          <p className="mb-4 text-sm text-muted-foreground">Participants</p>
-          <div className="grid grid-cols-3 gap-4 sm:grid-cols-4 sm:gap-5 md:grid-cols-6">
-            {participants.map((participant, index) => (
-              <motion.div key={participant.id} initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: index * 0.05 }}>
-                <Avatar participant={participant} />
-              </motion.div>
+        <Panel className="flex flex-col gap-4">
+          <p className="text-sm text-muted-foreground">
+            {participants.length} {participants.length === 1 ? "person" : "people"} in the room
+          </p>
+          <ul className="flex flex-col gap-3">
+            <AnimatePresence initial={false}>
+              {participants.map((participant) => (
+                <motion.li
+                  key={participant.id}
+                  layout
+                  initial={{ opacity: 0, x: -12, scale: 0.9 }}
+                  animate={{ opacity: 1, x: 0, scale: 1 }}
+                  className="flex items-center gap-3"
+                >
+                  <Avatar name={initials(participant.displayName)} color={avatarColor(participant.id)} />
+                  <span className="truncate font-medium">{participant.displayName}</span>
+                  {participant.id === session.createdBy && (
+                    <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs text-primary">Host</span>
+                  )}
+                </motion.li>
+              ))}
+            </AnimatePresence>
+            {Array.from({ length: emptySlots }).map((_, index) => (
+              <li key={`slot-${index}`} className="flex animate-pulse items-center gap-3">
+                <div className="size-11 rounded-full border border-dashed border-border" />
+                <span className="text-sm text-muted-foreground">Waiting...</span>
+              </li>
             ))}
-            {Array.from({ length: Math.max(0, 6 - participants.length) }).map((_, index) => (
-              <motion.div key={`empty-${index}`} className="flex flex-col items-center gap-2" animate={{ opacity: [0.3, 0.6, 0.3] }} transition={{ duration: 2, repeat: Infinity, delay: index * 0.2 }}>
-                <div className="h-14 w-14 rounded-full border-2 border-dashed border-muted-foreground/30" />
-                <span className="text-xs text-muted-foreground/50">Waiting...</span>
-              </motion.div>
-            ))}
-          </div>
-          {!isCreator && (
-            <div className="mt-8 rounded-2xl border border-primary/20 bg-background/35 p-4 text-center">
-              <motion.p className="text-muted-foreground" animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 2, repeat: Infinity }}>
-                Waiting for the host to start...
-              </motion.p>
-            </div>
-          )}
-        </section>
+          </ul>
+        </Panel>
       </div>
-    </main>
+    </Screen>
   );
 }
 

@@ -1,7 +1,9 @@
+import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, Plus, X } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { Button, Input, Panel, Screen } from "../components/kit";
 import { hasSupabaseConfig, supabase } from "../supabase/client";
 import { createLocalSession, makeLocalOptions } from "../utils/localSessionStore";
 import { makeOptionId, makeSessionId, SESSION_TTL_MS } from "../utils/session";
@@ -25,14 +27,14 @@ export function CreateSession({ userId }: { userId: string }) {
 
     if (!hasSupabaseConfig) {
       for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-        const options = makeLocalOptions(sessionId, filledOptions, makeOptionId);
+        const localOptions = makeLocalOptions(sessionId, filledOptions, makeOptionId);
         created = createLocalSession({
           id: sessionId,
           topic: topic.trim(),
           status: "waiting",
           createdBy: userId,
           expiresAt: Date.now() + SESSION_TTL_MS,
-          options,
+          options: localOptions,
           participants: [
             {
               id: userId,
@@ -119,68 +121,74 @@ export function CreateSession({ userId }: { userId: string }) {
   }
 
   return (
-    <main className="mx-auto min-h-dvh w-full max-w-6xl px-4 py-6 sm:px-6 lg:py-12">
-      <div className="mb-8 flex items-center gap-4">
-        <button onClick={() => navigate("/")} className="flex h-11 w-11 items-center justify-center rounded-xl border border-primary/20 bg-card/70 transition hover:bg-card" aria-label="Back">
-          <ArrowLeft className="h-6 w-6" />
-        </button>
-        <div>
-          <p className="text-sm text-muted-foreground">Create a session</p>
-          <h1 className="text-3xl font-bold md:text-4xl">New Decision</h1>
+    <Screen className="flex max-w-2xl flex-col gap-6 py-6">
+      <div className="flex items-center gap-3">
+        <Button variant="ghost" className="size-12 px-0" onClick={() => navigate("/")} aria-label="Back">
+          <ArrowLeft size={20} />
+        </Button>
+        <h1 className="font-display text-2xl font-bold">New Decision</h1>
+      </div>
+
+      <Panel className="flex flex-col gap-3">
+        <div className="flex items-baseline justify-between">
+          <label className="text-sm font-medium">Topic</label>
+          <span className="text-xs text-muted-foreground">
+            {topic.length}/{charLimit}
+          </span>
         </div>
-      </div>
+        <Input
+          value={topic}
+          maxLength={charLimit}
+          placeholder="e.g., Where should we eat?"
+          onChange={(event) => setTopic(event.target.value.slice(0, charLimit))}
+        />
+      </Panel>
 
-      <div className="mt-6 rounded-2xl border border-primary/20 bg-card/70 p-4 shadow-2xl shadow-primary/10 backdrop-blur sm:p-6 md:mt-8 md:p-8">
-        <section className="mb-8">
-          <label className="mb-2 block text-sm text-muted-foreground">What are we deciding?</label>
-          <input
-            type="text"
-            value={topic}
-            onChange={(event) => setTopic(event.target.value.slice(0, charLimit))}
-            placeholder="e.g., Where should we eat?"
-            className="h-14 w-full rounded-2xl border border-border bg-card px-4 text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary sm:text-lg"
-            maxLength={charLimit}
-          />
-          <p className="mt-1 text-right text-xs text-muted-foreground">{topic.length}/{charLimit}</p>
-        </section>
+      <Panel className="flex flex-col gap-3">
+        <label className="text-sm font-medium">Options</label>
+        <AnimatePresence initial={false}>
+          {options.map((option, index) => (
+            <motion.div
+              key={index}
+              layout
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, height: 0 }}
+              className="flex items-center gap-2"
+            >
+              <Input
+                value={option}
+                maxLength={40}
+                placeholder={`Option ${index + 1}`}
+                onChange={(event) => {
+                  const next = [...options];
+                  next[index] = event.target.value.slice(0, 40);
+                  setOptions(next);
+                }}
+              />
+              {options.length > 2 && (
+                <Button
+                  variant="ghost"
+                  aria-label="Remove option"
+                  className="size-12 shrink-0 px-0"
+                  onClick={() => setOptions(options.filter((_, itemIndex) => itemIndex !== index))}
+                >
+                  <X size={18} />
+                </Button>
+              )}
+            </motion.div>
+          ))}
+        </AnimatePresence>
+        {options.length < 6 && (
+          <Button variant="outline" onClick={() => setOptions([...options, ""])}>
+            <Plus size={18} /> Add option
+          </Button>
+        )}
+      </Panel>
 
-        <section>
-          <label className="mb-3 block text-sm text-muted-foreground">Options</label>
-          <div className="grid gap-3 md:grid-cols-2">
-            {options.map((option, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <input
-                  type="text"
-                  value={option}
-                  onChange={(event) => {
-                    const next = [...options];
-                    next[index] = event.target.value;
-                    setOptions(next);
-                  }}
-                  placeholder={`Option ${index + 1}`}
-                  className="h-12 min-w-0 flex-1 rounded-xl border border-primary/40 bg-card px-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  maxLength={40}
-                />
-                {options.length > 2 && (
-                  <button onClick={() => setOptions(options.filter((_, itemIndex) => itemIndex !== index))} className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive" aria-label="Remove option">
-                    <X className="h-5 w-5" />
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-
-          <button onClick={() => setOptions([...options, ""])} disabled={options.length >= 6} className="mt-2 flex h-12 w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border text-muted-foreground transition hover:border-primary hover:text-primary disabled:opacity-40">
-            <Plus className="h-5 w-5" />
-            Add option
-          </button>
-          <p className="mt-3 text-xs text-muted-foreground">Add 2 to 6 options.</p>
-        </section>
-
-        <button onClick={createSession} disabled={!isValid || creating} className="mt-8 h-14 w-full rounded-2xl bg-primary font-bold text-primary-foreground transition hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground md:w-auto md:px-12">
-          {creating ? "Creating..." : "Create & Invite"}
-        </button>
-      </div>
-    </main>
+      <Button disabled={!isValid || creating} onClick={() => void createSession()}>
+        {creating ? "Creating..." : "Create & Invite"}
+      </Button>
+    </Screen>
   );
 }

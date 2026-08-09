@@ -24,7 +24,7 @@ export function initials(name: string) {
 }
 
 export function avatarColor(seed: string) {
-  const colors = ["#5C6BFF", "#3DDC84", "#FF5C5C", "#FFD166", "#4ECDC4", "#B388FF"];
+  const colors = ["#8B5CF6", "#FF6B8B", "#FFC53D", "#2DD4A7", "#38BDF8", "#FB7185", "#F97316", "#A3E635"];
   let sum = 0;
   for (const char of seed) sum += char.charCodeAt(0);
   return colors[sum % colors.length];

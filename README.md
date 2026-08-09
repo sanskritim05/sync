@@ -2,8 +2,6 @@
 
 Sync makes group decisions fast and fun. Create a voting session with a topic and up to six options, invite your friends via a shareable link, and let everyone vote in real time. No account required.
 
-[Try it out!](https://syncrealtime.netlify.app)
-
 
 ## About The Project
 
