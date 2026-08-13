@@ -119,7 +119,7 @@ export function WaitingRoom({ userId }: { userId: string }) {
                   <Avatar name={initials(participant.displayName)} color={avatarColor(participant.id)} />
                   <span className="truncate font-medium">{participant.displayName}</span>
                   {participant.id === session.createdBy && (
-                    <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs text-primary">Host</span>
+                    <span className="bg-primary-soft rounded-full px-2 py-0.5 text-xs text-primary">Host</span>
                   )}
                 </motion.li>
               ))}

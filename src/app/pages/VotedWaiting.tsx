@@ -56,7 +56,7 @@ export function VotedWaiting({ userId }: { userId: string }) {
     <Screen className="flex max-w-lg flex-col items-center gap-8 py-10">
       <div className="relative grid size-28 place-items-center">
         <motion.span
-          className="absolute inset-0 rounded-full border-4 border-primary/25 border-t-primary"
+          className="ring-primary absolute inset-0 rounded-full border-4"
           animate={{ rotate: 360 }}
           transition={{ repeat: Infinity, duration: 1.4, ease: "linear" }}
         />
@@ -80,7 +80,7 @@ export function VotedWaiting({ userId }: { userId: string }) {
                     <Check size={12} strokeWidth={4} className="text-background" />
                   </span>
                 ) : (
-                  <span className="absolute inset-0 animate-ping rounded-full border-2 border-primary/40" />
+                  <span className="ping-primary absolute inset-0 animate-ping rounded-full border-2" />
                 )}
               </div>
               <span className="w-full truncate text-xs text-muted-foreground">{participant.displayName}</span>

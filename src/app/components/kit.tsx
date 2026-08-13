@@ -12,7 +12,7 @@ const variants: Record<Variant, string> = {
   success: "bg-success text-success-foreground border-[2.5px] border-ink shadow-pop",
   destructive: "bg-bubble text-primary-foreground border-[2.5px] border-ink shadow-pop",
   outline: "bg-sunny text-ink border-[2.5px] border-ink shadow-pop",
-  ghost: "text-muted-foreground hover:text-foreground hover:bg-secondary/70",
+  ghost: "text-muted-foreground hover-text-foreground bg-secondary-hover",
 };
 
 export function Button({
@@ -37,7 +37,7 @@ export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElem
     <input
       {...props}
       className={cn(
-        "border-ink h-12 w-full rounded-2xl border-[2.5px] bg-white px-4 text-base font-semibold text-foreground outline-none transition-all placeholder:font-normal placeholder:text-muted-foreground focus:-translate-y-0.5 focus:shadow-[var(--shadow-pop-sm)]",
+        "border-ink placeholder-muted focus-pop h-12 w-full rounded-2xl border-[2.5px] bg-white px-4 text-base font-semibold text-foreground outline-none transition-all",
         className,
       )}
     />

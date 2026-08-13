@@ -69,7 +69,7 @@ export function Reveal({ userId }: { userId: string }) {
             <h1 className="font-display text-2xl font-bold">{session.topic}</h1>
 
             {settledWinner ? (
-              <Panel className="flex flex-col items-center gap-3 border-primary/40 py-8 text-center">
+              <Panel className="flex flex-col items-center gap-3 py-8 text-center">
                 <Star size={36} className="text-primary" fill="currentColor" />
                 <p className="text-sm tracking-widest text-muted-foreground uppercase">
                   {isTie ? "Coin flip winner" : "Winner"}
@@ -90,7 +90,7 @@ export function Reveal({ userId }: { userId: string }) {
                 <motion.div
                   animate={flipping ? { rotateY: 1440, scale: [1, 1.2, 1] } : {}}
                   transition={{ duration: 1.4, ease: "easeOut" }}
-                  className="grid size-16 place-items-center rounded-full bg-primary/20 text-primary"
+                  className="bg-primary-glow grid size-16 place-items-center rounded-full text-primary"
                 >
                   <Coins size={30} />
                 </motion.div>

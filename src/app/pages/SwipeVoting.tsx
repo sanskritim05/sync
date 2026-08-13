@@ -217,10 +217,10 @@ function SwipeCard({
       <p className="text-center font-display text-3xl leading-tight font-bold text-balance">{option.label}</p>
       {active && (
         <>
-          <motion.div style={{ opacity: yesOpacity }} className="pointer-events-none absolute inset-0 grid place-items-center bg-success/25">
+          <motion.div style={{ opacity: yesOpacity }} className="bg-success-soft pointer-events-none absolute inset-0 grid place-items-center">
             <Check size={96} className="text-success" strokeWidth={3} />
           </motion.div>
-          <motion.div style={{ opacity: noOpacity }} className="pointer-events-none absolute inset-0 grid place-items-center bg-destructive/25">
+          <motion.div style={{ opacity: noOpacity }} className="bg-destructive-soft pointer-events-none absolute inset-0 grid place-items-center">
             <X size={96} className="text-destructive" strokeWidth={3} />
           </motion.div>
         </>
